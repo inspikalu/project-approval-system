@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify, session, send_from_directory
 import os
 import secrets
+from functools import wraps
 from shared import (
     load_json, save_json, sanitize_input, hash_password,
     USERS_FILE, SUBMISSIONS_FILE, SALT_LEGACY as SALT
@@ -15,6 +16,29 @@ if not app.secret_key:
     app.secret_key = secrets.token_hex(32)
     print("WARNING: Using auto-generated secret key. Set SECRET_KEY environment variable for production.")
 
+# Custom CSRF Protection Implementation
+def generate_csrf_token():
+    """Generate a new CSRF token and store it in the session."""
+    if 'csrf_token' not in session:
+        session['csrf_token'] = secrets.token_hex(32)
+    return session['csrf_token']
+
+def validate_csrf_token():
+    """Validate CSRF token from request headers."""
+    token = request.headers.get('X-CSRF-Token')
+    session_token = session.get('csrf_token')
+    return token and session_token and secrets.compare_digest(token, session_token)
+
+def csrf_protect(f):
+    """Decorator to protect routes with CSRF validation."""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if request.method in ['POST', 'PUT', 'DELETE', 'PATCH']:
+            if not validate_csrf_token():
+                return jsonify({'success': False, 'message': 'CSRF validation failed'}), 403
+        return f(*args, **kwargs)
+    return decorated_function
+
 @app.route('/', methods=['GET'])
 def index():
     return send_from_directory(app.static_folder, 'index.html')
@@ -23,8 +47,14 @@ def index():
 def static_proxy(path):
     return send_from_directory(app.static_folder, path)
 
+@app.route('/api/csrf-token', methods=['GET'])
+def get_csrf_token():
+    """Endpoint to get CSRF token for the current session."""
+    return jsonify({'csrf_token': generate_csrf_token()})
+
 @app.route('/api/login', methods=['POST'])
 def login():
+    # Login is exempt from CSRF protection to allow initial authentication
     data = request.json
     username = sanitize_input(data.get('username', ''))
     password = data.get('password', '')
@@ -39,13 +69,17 @@ def login():
                 'username': user['username'],
                 'role': user['role']
             }
-            return jsonify({'success': True, 'user': session['user']})
+            # Generate CSRF token for authenticated session
+            csrf_token = generate_csrf_token()
+            return jsonify({'success': True, 'user': session['user'], 'csrf_token': csrf_token})
     
     return jsonify({'success': False, 'message': 'Invalid credentials'}), 401
 
 @app.route('/api/logout', methods=['POST'])
+@csrf_protect
 def logout():
     session.pop('user', None)
+    session.pop('csrf_token', None)  # Clear CSRF token on logout
     return jsonify({'success': True})
 
 @app.route('/api/user', methods=['GET'])
@@ -71,6 +105,7 @@ def get_submissions():
         return jsonify(subs)
 
 @app.route('/api/submissions', methods=['POST'])
+@csrf_protect
 def create_submission():
     if 'user' not in session or session['user']['role'] != 'student':
         return jsonify({'success': False}), 403
@@ -96,6 +131,7 @@ def create_submission():
     return jsonify({'success': True, 'submission': new_sub})
 
 @app.route('/api/submissions/respond', methods=['POST'])
+@csrf_protect
 def respond_submission():
     if 'user' not in session or session['user']['role'] != 'staff':
         return jsonify({'success': False}), 403

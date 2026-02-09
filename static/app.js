@@ -1,5 +1,6 @@
 let currentUser = null;
 let currentSubmissions = [];
+let csrfToken = null;  // Store CSRF token
 
 // Init
 document.addEventListener('DOMContentLoaded', () => {
@@ -45,6 +46,7 @@ async function handleLogin(e) {
         if (response.ok) {
             const data = await response.json();
             currentUser = data.user;
+            csrfToken = data.csrf_token;  // Store CSRF token
             errorEl.classList.add('hidden');
             showDashboard();
         } else {
@@ -57,8 +59,12 @@ async function handleLogin(e) {
 }
 
 async function handleLogout() {
-    await fetch('/api/logout', { method: 'POST' });
+    await fetch('/api/logout', { 
+        method: 'POST',
+        headers: { 'X-CSRF-Token': csrfToken }
+    });
     currentUser = null;
+    csrfToken = null;  // Clear CSRF token
     showScreen('login-screen');
 }
 
@@ -167,7 +173,10 @@ async function handleSubmission(e) {
     
     const response = await fetch('/api/submissions', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': csrfToken  // Include CSRF token
+        },
         body: JSON.stringify({ type: currentModalType, content })
     });
     
@@ -207,7 +216,10 @@ globalThis.submitResponse = async (status) => {
     
     const res = await fetch('/api/submissions/respond', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': csrfToken  // Include CSRF token
+        },
         body: JSON.stringify({ id: currentReviewId, status, response })
     });
     
