@@ -1,12 +1,19 @@
 from flask import Flask, request, jsonify, session, send_from_directory
 import os
+import secrets
 from shared import (
     load_json, save_json, sanitize_input, hash_password,
     USERS_FILE, SUBMISSIONS_FILE, SALT_LEGACY as SALT
 )
 
 app = Flask(__name__, static_folder='static')
-app.secret_key = 'super_secret_key_for_session' # In a real app, use an env variable
+
+# Load secret key from environment variable or generate a secure random one
+app.secret_key = os.environ.get('SECRET_KEY')
+if not app.secret_key:
+    # Generate a secure random key if not provided
+    app.secret_key = secrets.token_hex(32)
+    print("WARNING: Using auto-generated secret key. Set SECRET_KEY environment variable for production.")
 
 @app.route('/')
 def index():
