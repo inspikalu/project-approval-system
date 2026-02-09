@@ -1,1 +1,1 @@
-[{"username": "student1", "pw": "2b90d4dd96bf724a7782399260468bbfbd7505045a90098a468d5a5c86de325c", "role": "student"}, {"username": "prof_smith", "pw": "cc483d735c1e2fb071ef8ba308334d450fc2f30d33b1c1e905029df056c6f81d", "role": "staff"}]
+[{"username": "student1", "pw": "2b90d4dd96bf724a7782399260468bbfbd7505045a90098a468d5a5c86de325c", "role": "student", "salt": "salt123"}, {"username": "prof_smith", "pw": "cc483d735c1e2fb071ef8ba308334d450fc2f30d33b1c1e905029df056c6f81d", "role": "staff", "salt": "salt123"}]

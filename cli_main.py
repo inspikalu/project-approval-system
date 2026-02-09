@@ -2,17 +2,24 @@ import json
 import hashlib
 import os
 import sys
+import secrets
 
 # --- Security & Data Constants ---
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(SCRIPT_DIR, "data")
 USERS_FILE = os.path.join(DATA_DIR, "users.json")
 SUBMISSIONS_FILE = os.path.join(DATA_DIR, "submissions.json")
-SALT = b"salt123"
+SALT = b"salt123" # Legacy salt for migration
 
 # --- Security Utilities ---
-def hash_password(password):
-    return hashlib.pbkdf2_hmac('sha256', password.encode(), SALT, 100000).hex()
+def hash_password(password, salt=None):
+    if salt is None:
+        salt = secrets.token_hex(8)
+    if isinstance(salt, str):
+        salt_bytes = salt.encode()
+    else:
+        salt_bytes = salt
+    return hashlib.pbkdf2_hmac('sha256', password.encode(), salt_bytes, 100000).hex(), salt
 
 def load_json(filepath):
     if not os.path.exists(filepath): return []
@@ -40,18 +47,21 @@ class ProjectApprovalSystemCLI:
         pw = input("Password: ").strip()
         
         users = load_json(USERS_FILE)
-        hashed = hash_password(pw)
-        match = next((u for u in users if u['username'] == user and u['pw'] == hashed), None)
+        match = next((u for u in users if u['username'] == user), None)
         
         if match:
-            self.current_user = match
-            print(f"Logged in as {match['username']} ({match['role']})")
-            if match['role'] == 'student':
-                self.student_menu()
-            else:
-                self.staff_menu()
-        else:
-            print("Error: Invalid credentials.")
+            # Hash use the stored salt
+            hashed, _ = hash_password(pw, match.get('salt', SALT))
+            if match['pw'] == hashed:
+                self.current_user = match
+                print(f"Logged in as {match['username']} ({match['role']})")
+                if match['role'] == 'student':
+                    self.student_menu()
+                else:
+                    self.staff_menu()
+                return
+        
+        print("Error: Invalid credentials.")
 
     def student_menu(self):
         while True:
