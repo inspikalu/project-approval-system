@@ -1,1 +1,10 @@
-[]
+[
+    {
+        "id": 1,
+        "student_id": "student1",
+        "type": "Topic",
+        "content": "Web App Security Testing with ZAP",
+        "status": "Approved",
+        "response": "Good topic choice!"
+    }
+]

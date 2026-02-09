@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Approval System</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="dark-mode">
+    <div id="app">
+        <!-- Login Screen -->
+        <div id="login-screen" class="screen main-card">
+            <header>
+                <h1>Project Approval</h1>
+                <p>Sign in to your account</p>
+            </header>
+            <form id="login-form">
+                <div class="input-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" placeholder="Enter your username" required>
+                </div>
+                <div class="input-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn-primary">Login</button>
+            </form>
+            <div id="login-error" class="error-msg hidden">Invalid credentials. Please try again.</div>
+        </div>
+
+        <!-- Student Dashboard -->
+        <div id="student-dashboard" class="screen hidden">
+            <nav class="navbar">
+                <div class="nav-brand">Project Portal</div>
+                <div class="nav-user">
+                    <span id="student-username"></span>
+                    <button class="btn-link logout-btn">Logout</button>
+                </div>
+            </nav>
+            <main class="container">
+                <section class="actions-section">
+                    <h2>Quick Actions</h2>
+                    <div class="actions-grid">
+                        <button class="action-card" onclick="openModal('Topic')">
+                            <i class="icon">📝</i>
+                            <span>Submit Topic</span>
+                        </button>
+                        <button class="action-card" onclick="openModal('Background')">
+                            <i class="icon">📖</i>
+                            <span>Submit Background</span>
+                        </button>
+                    </div>
+                </section>
+                <section class="list-section">
+                    <h2>Your Submissions</h2>
+                    <div id="student-submissions-list" class="submissions-list">
+                        <!-- Submissions injected here -->
+                    </div>
+                </section>
+            </main>
+        </div>
+
+        <!-- Staff Dashboard -->
+        <div id="staff-dashboard" class="screen hidden">
+            <nav class="navbar">
+                <div class="nav-brand">Staff Portal</div>
+                <div class="nav-user">
+                    <span id="staff-username"></span>
+                    <button class="btn-link logout-btn">Logout</button>
+                </div>
+            </nav>
+            <main class="container">
+                <header class="page-header">
+                    <h1>Review Submissions</h1>
+                    <button class="btn-secondary" onclick="refreshSubmissions()">Refresh</button>
+                </header>
+                <div id="staff-submissions-list" class="submissions-table-container">
+                    <!-- Table injected here -->
+                </div>
+            </main>
+        </div>
+
+        <!-- Submission Modal -->
+        <div id="submission-modal" class="modal hidden">
+            <div class="modal-content main-card">
+                <header>
+                    <h2 id="modal-title">Submit Topic</h2>
+                    <button class="close-btn" onclick="closeModal()">&times;</button>
+                </header>
+                <form id="submission-form">
+                    <div class="input-group">
+                        <label for="submission-content">Details</label>
+                        <textarea id="submission-content" rows="8" placeholder="Enter details here..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn-primary">Submit for Approval</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Response Modal -->
+        <div id="response-modal" class="modal hidden">
+            <div class="modal-content main-card">
+                <header>
+                    <h2>Submissions Review</h2>
+                    <button class="close-btn" onclick="closeResponseModal()">&times;</button>
+                </header>
+                <div id="submission-review-details">
+                    <!-- Details here -->
+                </div>
+                <form id="response-form">
+                    <div class="input-group">
+                        <label for="staff-comment">Comments</label>
+                        <textarea id="staff-comment" rows="4" placeholder="Optional comments..."></textarea>
+                    </div>
+                    <div class="btn-group">
+                        <button type="button" class="btn-approve" onclick="submitResponse('Approved')">Approve</button>
+                        <button type="button" class="btn-reject" onclick="submitResponse('Rejected')">Reject</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
