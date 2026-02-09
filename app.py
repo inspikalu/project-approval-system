@@ -16,6 +16,10 @@ if not app.secret_key:
     app.secret_key = secrets.token_hex(32)
     print("WARNING: Using auto-generated secret key. Set SECRET_KEY environment variable for production.")
 
+# Enable CSRF protection (using custom implementation below)
+app.config['WTF_CSRF_ENABLED'] = True
+app.config['WTF_CSRF_CHECK_DEFAULT'] = False  # We use custom decorator instead
+
 # Custom CSRF Protection Implementation
 def generate_csrf_token():
     """Generate a new CSRF token and store it in the session."""
