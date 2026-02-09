@@ -159,4 +159,6 @@ def respond_submission():
     return jsonify({'success': False, 'message': 'Submission not found'}), 404
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    # Only enable debug mode if explicitly set in environment
+    debug_mode = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
+    app.run(debug=debug_mode, port=5000)
