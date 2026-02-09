@@ -24,6 +24,7 @@ async function checkAuth() {
             showScreen('login-screen');
         }
     } catch (err) {
+        console.error('Auth check failed:', err);
         showScreen('login-screen');
     }
 }
@@ -149,14 +150,14 @@ function renderStaffSubmissions() {
 
 // Modals
 let currentModalType = '';
-window.openModal = (type) => {
+globalThis.openModal = (type) => {
     currentModalType = type;
     document.getElementById('modal-title').textContent = `Submit ${type}`;
     document.getElementById('submission-content').value = '';
     document.getElementById('submission-modal').classList.remove('hidden');
 };
 
-window.closeModal = () => {
+globalThis.closeModal = () => {
     document.getElementById('submission-modal').classList.add('hidden');
 };
 
@@ -178,7 +179,7 @@ async function handleSubmission(e) {
 
 // Staff Review
 let currentReviewId = null;
-window.reviewSubmission = (id) => {
+globalThis.reviewSubmission = (id) => {
     const sub = currentSubmissions.find(s => s.id === id);
     if (!sub) return;
     
@@ -197,11 +198,11 @@ window.reviewSubmission = (id) => {
     document.getElementById('response-modal').classList.remove('hidden');
 };
 
-window.closeResponseModal = () => {
+globalThis.closeResponseModal = () => {
     document.getElementById('response-modal').classList.add('hidden');
 };
 
-window.submitResponse = async (status) => {
+globalThis.submitResponse = async (status) => {
     const response = document.getElementById('staff-comment').value;
     
     const res = await fetch('/api/submissions/respond', {

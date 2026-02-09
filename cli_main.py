@@ -32,6 +32,33 @@ class ProjectApprovalSystemCLI:
         
         print("Error: Invalid credentials.")
 
+    def _create_submission(self, sub_type):
+        """Helper method to create a new submission."""
+        content = sanitize_input(input(f"Enter {sub_type} content: "))
+        if content:
+            subs = load_json(SUBMISSIONS_FILE)
+            subs.append({
+                "id": len(subs) + 1,
+                "student_id": self.current_user['username'],
+                "type": sub_type,
+                "content": content,
+                "status": "Pending",
+                "response": ""
+            })
+            save_json(SUBMISSIONS_FILE, subs)
+            print(f"{sub_type} submitted.")
+
+    def _view_my_submissions(self):
+        """Helper method to view student's own submissions."""
+        subs = load_json(SUBMISSIONS_FILE)
+        print("\nYour Submissions:")
+        for s in subs:
+            if s.get('student_id') == self.current_user['username']:
+                s_type = s.get('type', 'Unknown')
+                s_status = s.get('status', 'Pending')
+                s_content = s.get('content', 'No content')
+                print(f"[{s_type}] Status: {s_status} | Content: {s_content[:30]}...")
+
     def student_menu(self):
         while True:
             print(f"\n--- Student Menu ({self.current_user['username']}) ---")
@@ -41,30 +68,12 @@ class ProjectApprovalSystemCLI:
             print("4. Logout")
             choice = input("Choice: ")
             
-            if choice in ['1', '2']:
-                sub_type = "Topic" if choice == '1' else "Background"
-                content = sanitize_input(input(f"Enter {sub_type} content: "))
-                if content:
-                    subs = load_json(SUBMISSIONS_FILE)
-                    subs.append({
-                        "id": len(subs) + 1,
-                        "student_id": self.current_user['username'],
-                        "type": sub_type,
-                        "content": content,
-                        "status": "Pending",
-                        "response": ""
-                    })
-                    save_json(SUBMISSIONS_FILE, subs)
-                    print(f"{sub_type} submitted.")
+            if choice == '1':
+                self._create_submission("Topic")
+            elif choice == '2':
+                self._create_submission("Background")
             elif choice == '3':
-                subs = load_json(SUBMISSIONS_FILE)
-                print("\nYour Submissions:")
-                for s in subs:
-                    if s.get('student_id') == self.current_user['username']:
-                        s_type = s.get('type', 'Unknown')
-                        s_status = s.get('status', 'Pending')
-                        s_content = s.get('content', 'No content')
-                        print(f"[{s_type}] Status: {s_status} | Content: {s_content[:30]}...")
+                self._view_my_submissions()
             elif choice == '4':
                 break
 

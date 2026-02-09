@@ -4,7 +4,7 @@
     --bg-dark: #0f172a;
     --card-bg: #1e293b;
     --text-main: #f8fafc;
-    --text-muted: #94a3b8;
+    --text-muted: #cbd5e1; /* Updated for WCAG AA contrast compliance */
     --border: #334155;
     --success: #22c55e;
     --danger: #ef4444;
@@ -64,6 +64,7 @@ body {
     font-size: 2rem;
     margin-bottom: 0.5rem;
     background: linear-gradient(to right, #818cf8, #c084fc);
+    background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }

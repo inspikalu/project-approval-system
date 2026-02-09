@@ -26,7 +26,8 @@ def load_json(filepath):
     try:
         with open(filepath, 'r') as f:
             return json.load(f)
-    except: return []
+    except (json.JSONDecodeError, IOError):
+        return []
 
 def save_json(filepath, data):
     if not os.path.exists(DATA_DIR): os.makedirs(DATA_DIR)

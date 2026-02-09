@@ -87,7 +87,13 @@ class ProjectApprovalSystem:
                 s_type = s.get('type', 'Unknown')
                 s_content = s.get('content', 'No content')
                 s_status = s.get('status', 'Pending')
-                color = "green" if s_status == "Approved" else "red" if s_status == "Rejected" else "black"
+                # Determine color based on status
+                if s_status == "Approved":
+                    color = "green"
+                elif s_status == "Rejected":
+                    color = "red"
+                else:
+                    color = "black"
                 tk.Label(scrollable_frame, text=f"[{s_type}] {s_content[:30]}... | Status: {s_status}", 
                          fg=color).pack(anchor="w")
 
@@ -124,25 +130,33 @@ class ProjectApprovalSystem:
 
         tk.Button(form, text="Submit", command=submit, width=15).pack(pady=10)
 
-    def show_staff_dashboard(self):
-        self.clear_screen()
-        tk.Label(self.root, text="Staff Dashboard - Submissions Review", font=("Arial", 14)).pack(pady=10)
-        
+    def _setup_staff_treeview(self):
+        """Helper method to set up the staff treeview widget."""
         self.tree = ttk.Treeview(self.root, columns=("ID", "Student", "Type", "Status"), show='headings')
-        self.tree.heading("ID", text="ID"); self.tree.heading("Student", text="Student")
-        self.tree.heading("Type", text="Type"); self.tree.heading("Status", text="Status")
-        self.tree.column("ID", width=30); self.tree.column("Student", width=100)
-        self.tree.column("Type", width=100); self.tree.column("Status", width=100)
+        self.tree.heading("ID", text="ID")
+        self.tree.heading("Student", text="Student")
+        self.tree.heading("Type", text="Type")
+        self.tree.heading("Status", text="Status")
+        self.tree.column("ID", width=30)
+        self.tree.column("Student", width=100)
+        self.tree.column("Type", width=100)
+        self.tree.column("Status", width=100)
         self.tree.pack(fill=tk.BOTH, expand=True, padx=10)
 
-        self.load_submissions()
-
+    def _setup_staff_buttons(self):
+        """Helper method to set up staff dashboard buttons."""
         btn_frame = tk.Frame(self.root)
         btn_frame.pack(pady=10)
-        
         tk.Button(btn_frame, text="Refresh", command=self.load_submissions, width=15).pack(side=tk.LEFT, padx=5)
         tk.Button(btn_frame, text="Respond to Selected", command=self.respond_submission, width=20).pack(side=tk.LEFT, padx=5)
         tk.Button(self.root, text="Logout", command=self.show_login).pack(pady=5)
+
+    def show_staff_dashboard(self):
+        self.clear_screen()
+        tk.Label(self.root, text="Staff Dashboard - Submissions Review", font=("Arial", 14)).pack(pady=10)
+        self._setup_staff_treeview()
+        self.load_submissions()
+        self._setup_staff_buttons()
 
     def load_submissions(self):
         for i in self.tree.get_children(): self.tree.delete(i)
